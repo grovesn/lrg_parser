@@ -14,7 +14,6 @@ for file in filenames:
   fixed_annotation = root[0]
   id = fixed_annotation[0].text
   print 'id = ', id
-  for child in fixed_annotation.iter('sequence'):
-    sequence = child.text
-    print 'sequence found'
-    
+ 
+  for child in fixed_annotation('sequence'):
+    print 'sequence found'     
