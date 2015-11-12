@@ -23,9 +23,16 @@ for file in filenames:
   print 'id = ', id
   fa_children = fixed_annotation.getchildren()
 
+  transcripts = []
+
   for tags in fa_children:
     if tags.tag == 'sequence':
       sequence = tags.text
       check_sequence(sequence)
       print sequence[0:10]
-    
+    elif tags.tag== 'transcript':
+      transcripts.append(tags)
+ 
+  print transcripts[0].attrib['name']
+      
+      
