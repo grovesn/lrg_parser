@@ -118,6 +118,31 @@ def get_exon_coords(exons, id, trans):
   return dics
       
 
+#EXPORT FUNCTIONS
+
+def export_xml(): 
+  export_root = tree.Element(id)
+  trans_attrib = {'name' : trans}
+  trans_tag = tree.SubElement(export_root, 'transcript', trans_attrib)
+  
+  for intron in ultimate_dic:
+    intron_attrib = {'number' : str(intron[0]), 'start' : str(intron[1]), 'end' : str(intron[2])}
+    intron_tag = tree.SubElement(trans_tag, 'intron', intron_attrib)
+    intron_tag.text = intron[3]
+
+  print tree.tostring(export_root)
+
+
+
+
+
+
+
+
+
+
+#CODE START
+
 filenames = glob.glob('/home/swc/Desktop/lrg/files_to_be_analysed/LRG*.xml')
 #imports all files in the specified folder
 
@@ -166,22 +191,26 @@ for file in filenames:
 #get the number of introns - this is one less than the actual number as the start of intron 1 and end of the last intron are not added to the dictionary
   intron_number = range(1, number_introns + 1)
 #create an array of values to loop through each intron sequentially - must be one more than the number of introns so that the last intron number is included in the for loop
-
+  ultimate_dic = []
   for intron in intron_number:
     start_key = 'intron' + str(intron) + 'start' #define the keys for the start and end of the intron
     end_key = 'intron' + str(intron) + 'end'
     if intron == 1: #the start of intron one is not included in the dictionary as it is the beginning of the sequence
+      start = 0
+      end = intron_dic[end_key]
       intron_header = 'intron 1 sequence:'
-      intron_sequence = sequence[0:intron_dic[end_key]] #extract the range of sequence that corresponds to the intron
-      print intron_header
-      print intron_sequence
+ #extract the range of sequence that corresponds to the intron
     elif intron == number_introns: #the end of the last intron is not included in the dictionary as it is the end of the sequence
+      start = intron_dic[start_key]
+      end = len(sequence)
       intron_header = 'intron ' + str(intron) + ' sequence:'
-      intron_sequence = sequence[intron_dic[start_key]:]
-      print intron_header
-      print intron_sequence
     else:
+      start = intron_dic[start_key]
+      end = intron_dic[end_key]
       intron_header = 'intron ' + str(intron) + ' sequence:'
-      intron_sequence = sequence[intron_dic[start_key]:intron_dic[end_key]]
-      print intron_header
-      print intron_sequence
+    intron_sequence = sequence[start:end + 1]
+    value = [intron, start, end, intron_sequence]
+    ultimate_dic.append(value)
+    print intron_header
+    print intron_sequence
+  export_xml()
