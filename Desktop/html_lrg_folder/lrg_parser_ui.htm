@@ -1,0 +1,112 @@
+<html>
+
+<head>
+<center>
+
+<br>
+<br>
+    <img src= "http://media.mmm-online.com/images/2014/05/23/bridges_598080.jpg?format=jpg&zoom=1&quality=70&anchor=middlecenter&width=320&mode=pad">
+   <font color = "white">
+   <title>LRG Intron Analyser</title>
+   <h1>LRG Intron Analyser</h1>
+</center>   
+</head>
+
+<script language="JavaScript"
+	
+<script>
+var strSavedFile;
+//describes global variant//
+
+
+function lrg_parser.py()
+{
+strTemp=frame1.document.getElementById("LRG*.xml").innerText;
+if (strTemp != "")
+//Tells the webpage to execute the script on the file that was just uploaded//
+
+   {
+   strLocalFile=frame1.document.getElementById("LRG*.xml").innerText;
+   strSavedFile=strTemp;
+   }
+else
+   alert('File must be uploaded first!');
+//Alerts user if they try to analyse a file without uploading one//
+
+
+var objFunction = new Object;
+objFunction.pyFile = "lrg_parser.py";
+//Directs the file to the correct python script//
+
+
+objFunction.inputdata = strSavedFile;
+//directs the correct file (global variant) to be analysed//
+
+
+objFunction.outputdata = "";
+outtemp = objFunction.outputdata;
+out = outtemp.split(",");
+//indicates the data is seperated by commas//
+
+document.getElementById('id').value = out[0];
+document.getElementById('transcript').value = out[1];
+document.getElementById('number_introns').value = out[2];
+//discribes the values produced by the analysis in order to be recalled below in HTML table//
+
+
+}
+
+
+</script>
+
+<body bgcolor= "6495ED"> 
+
+<center>
+<IFRAME SRC='loadfile.htm' WIDTH='500px' HEIGHT='80px' FRAMEBORDER=0 ID=frame1></IFRAME>
+<body bgcolor= "6495ED">
+<font color = "white">
+  
+<table><tr>
+<tr>
+	
+	<td><font color = "white">File Name:</td><td><input type='text' id='id' size='4'></td>
+	<td>&nbsp;</td>
+     
+
+</tr><tr>
+
+    <td><font color = "white">Transcript:</td><td><input type='text' id='transcript' size='4'></td>
+	<td>&nbsp;</td>
+    
+</tr><tr>
+
+    <td><font color = "white">Number of Introns:</td><td><input type='text' id='Number of Introns' size='4'></td>
+	<td>&nbsp;</td>
+    
+</tr></table>
+
+<br>
+<br>
+
+<table><tr>
+
+<td ALIGN=center><input type='button' value='Analyse' onclick='lrg_parser.py()'></td></tr>
+
+
+<tr>
+<td ALIGN=center><input type='button' value='Export Intron Sequences in XML' onclick=''></td></tr>
+
+
+<tr>
+<td ALIGN=center><input type='button' value='Export Intron Sequences in FASTA' onclick=''></td></tr>
+</table>
+
+    
+
+
+
+</center>
+
+</font>
+    </body>
+</html>
