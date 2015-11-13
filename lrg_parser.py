@@ -11,7 +11,7 @@ The script also requires an arguement that defines the output required. This mus
 
 Fasta output will generate a .fa file with the ID of the LRG file containing a header and the corresponding sequence for each intron.
 
-The header will be in the following format: ">id=LRG_7|transcript_name=t1|intron_number=12|length=2034bp" and the following line will contain the sequence
+The header will be in the following format: ">id=LRG_7|transcript_name=t1|intron_number=12" and the following line will contain the sequence
 
 XML files will contain the information within the header of the .fa file but structured as follows: 
 
@@ -129,21 +129,39 @@ def export_xml():
     intron_attrib = {'number' : str(intron[0]), 'start' : str(intron[1]), 'end' : str(intron[2])}
     intron_tag = tree.SubElement(trans_tag, 'intron', intron_attrib)
     intron_tag.text = intron[3]
+  
+  xml_file = filepath + 'analysis_results/' + id + '_results.xml'
+  file = open(xml_file,'w')
+    
+  file.write(tree.tostring(export_root))
 
-  print tree.tostring(export_root)
+def export_fasta():
+  fasta_file = filepath + 'analysis_results/' + id + '_results.fa'
+  file = open(fasta_file, 'w')
+  for intron in ultimate_dic:
+    intron_header = '>id=' + id + '|transcript=' + trans + '|intron_number=' + str(intron[0]) + '|start=' + str(intron[1]) + '|end=' + str(intron[2]) + '\n'
+    intron_sequence = intron[3] + '\n'
 
-
-
-
-
-
-
+    file.write(intron_header)
+    file.write(intron_sequence)
 
 
 
 #CODE START
+assert len(sys.argv) == 2, 'Please specify either xml or fasta as export type'
 
-filenames = glob.glob('/home/swc/Desktop/lrg/files_to_be_analysed/LRG*.xml')
+args = sys.argv
+export_type = None
+if args[1] == 'xml':
+  export_type = 'xml'
+elif args[1] == 'fasta':
+  export_type = 'fasta'
+else:
+  print 'Please specify either xml or fasta as export type'
+  exit()
+
+filepath = '/home/swc/Desktop/lrg/'
+filenames = glob.glob(filepath + 'files_to_be_analysed/LRG*.xml')
 #imports all files in the specified folder
 
 for file in filenames:
@@ -213,4 +231,7 @@ for file in filenames:
     ultimate_dic.append(value)
     print intron_header
     print intron_sequence
-  export_xml()
+  if export_type == 'xml':
+    export_xml()
+  elif export_type == 'fasta':
+    export_fasta()
