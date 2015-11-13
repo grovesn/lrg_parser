@@ -1,0 +1,29 @@
+<HTML>
+<script>
+function DoSubmit()
+{
+strTemp = document.getElementById("localfilename").value;
+if (strTemp == "")
+	{
+	alert('Please select a file before uploading!');
+	}
+else
+	{
+	document.getElementById("myform").submit();
+	}
+}
+function DoOnChange()
+{
+document.getElementById("btnSubmit").disabled = 0;
+}
+
+</script>
+<BODY>
+<form name="FormUpload" enctype="MULTIPART/FORM-DATA" method="POST" action="upload.hdx" id="myform">
+<input type="file" name="UploadFilename" size="40" id="localfilename" onchange="DoOnChange();">
+<input type="button" id="btnSubmit" name="UploadFile" value="Upload File" onclick="DoSubmit()" disabled>
+<div id=savedfilename></div>
+</form>
+</BODY>
+</HTML>
+
