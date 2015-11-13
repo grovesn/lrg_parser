@@ -36,7 +36,7 @@ import glob
 #imports glob to read multiple files
 import re
 #imports regular expression for pattern matching
-
+import string
 
 
 #ASSERTION FUNCTIONS
@@ -82,15 +82,23 @@ def get_exon_coords(exons, id, trans):
   intron_dic = {}
   exon_dic = {}
   trans_dic = {}
-  dics = [exon_dic, intron_dic, trans_dic]
+  numbers = []
+  dics = [exon_dic, intron_dic, trans_dic, numbers]
 #create an array for dictionaries to pass back to main code
-  
+
   for exon in exons:  
     label = exon.attrib['label']
-    name = 'exon' + label
-    print name
-    number = int(label)
+    number = 0
+    if re.search('[a-zA-Z]', label):
+      letter = label[1:]
+      point = string.lowercase.index(letter)
+      label = label[0:len(label)-1] + '.' + str(point)
+      number = float(label)
+    else:
+      number = int(label)
+    numbers.append(number)
     coord = exon.getchildren()
+    name = 'exon' + label
 #sets variables for keys in the dictionary
 
     for points in coord:
@@ -98,15 +106,15 @@ def get_exon_coords(exons, id, trans):
         key = name + 'start'
         start = int(points.attrib['start'])
         exon_dic[key] = start
-        intron_key = 'intron' + label + 'end'
+        intron_key = 'intron' + str(number) + 'end'
         intron_dic[intron_key] = start - 1
 #gets coords for exon start and intron end        
 
         key = name + 'end'
         end = int(points.attrib['end'])
         exon_dic[key] = end
-        intron_number = int(label) + 1
-        intron_key = 'intron' + str(intron_number) + 'start'
+        intron_number = number + 1
+        intron_key = 'intron' + str(number) + 'start'
         intron_dic[intron_key] = end + 1
 #gets coords for exon end and intron start
 
@@ -120,8 +128,9 @@ def get_exon_coords(exons, id, trans):
 
 #EXPORT FUNCTIONS
 
-def export_xml(): 
+def export_xml(header):
   export_root = tree.Element(id)
+    
   trans_attrib = {'name' : trans}
   trans_tag = tree.SubElement(export_root, 'transcript', trans_attrib)
   
@@ -131,8 +140,7 @@ def export_xml():
     intron_tag.text = intron[3]
   
   xml_file = filepath + 'analysis_results/' + id + '_results.xml'
-  file = open(xml_file,'w')
-    
+  file = open(xml_file, 'w')  
   file.write(tree.tostring(export_root))
 
 def export_fasta():
@@ -186,7 +194,6 @@ for file in filenames:
       print len(sequence)
     elif tags.tag== 'transcript':
       transcripts.append(tags)
-      print type(tags)
 #extracts sequence from xml and adds transcript elements to array
 
   test_for_none(transcripts, 'transcripts')
@@ -194,44 +201,46 @@ for file in filenames:
       
   for transcript in transcripts:
    trans = transcript.attrib['name']
-   print type(transcript)
    exons = transcript.findall('exon')
    test_for_none(exons, 'exons')
-   print exons
 #ensures there are exons in the xml   
 
    dics = get_exon_coords(exons, id, trans)
    exon_dic = dics[0]
    intron_dic = dics[1]
+   print intron_dic
+   numbers = dics[3]
+   print numbers
 #assign dictionaries in  array to the correct variable names
 
-  number_introns = len(intron_dic)/2 +1
+   number_introns = len(intron_dic)/2 +1
 #get the number of introns - this is one less than the actual number as the start of intron 1 and end of the last intron are not added to the dictionary
-  intron_number = range(1, number_introns + 1)
+  
 #create an array of values to loop through each intron sequentially - must be one more than the number of introns so that the last intron number is included in the for loop
-  ultimate_dic = []
-  for intron in intron_number:
-    start_key = 'intron' + str(intron) + 'start' #define the keys for the start and end of the intron
-    end_key = 'intron' + str(intron) + 'end'
-    if intron == 1: #the start of intron one is not included in the dictionary as it is the beginning of the sequence
-      start = 0
-      end = intron_dic[end_key]
-      intron_header = 'intron 1 sequence:'
+   ultimate_dic = []
+   for intron in numbers:
+     print intron
+     start_key = 'intron' + str(intron) + 'start' #define the keys for the start and end of the intron
+     end_key = 'intron' + str(intron) + 'end'
+     if intron == 1: #the start of intron one is not included in the dictionary as it is the beginning of the sequence
+       start = 0
+       end = intron_dic[end_key]
+       intron_header = 'intron 1 sequence:'
  #extract the range of sequence that corresponds to the intron
-    elif intron == number_introns: #the end of the last intron is not included in the dictionary as it is the end of the sequence
-      start = intron_dic[start_key]
-      end = len(sequence)
-      intron_header = 'intron ' + str(intron) + ' sequence:'
-    else:
-      start = intron_dic[start_key]
-      end = intron_dic[end_key]
-      intron_header = 'intron ' + str(intron) + ' sequence:'
-    intron_sequence = sequence[start:end + 1]
-    value = [intron, start, end, intron_sequence]
-    ultimate_dic.append(value)
-    print intron_header
-    print intron_sequence
-  if export_type == 'xml':
-    export_xml()
-  elif export_type == 'fasta':
-    export_fasta()
+     elif intron == number_introns: #the end of the last intron is not included in the dictionary as it is the end of the sequence
+       start = intron_dic[start_key]
+       end = len(sequence)
+       intron_header = 'intron ' + str(intron) + ' sequence:'
+     else:
+       start = intron_dic[start_key]
+       end = intron_dic[end_key]
+       intron_header = 'intron ' + str(intron) + ' sequence:'
+     intron_sequence = sequence[start:end + 1]
+     value = [intron, start, end, intron_sequence]
+     ultimate_dic.append(value)
+     print intron_header
+     print intron_sequence
+   if export_type == 'xml':
+     export_xml()
+   elif export_type == 'fasta':
+     export_fasta()
